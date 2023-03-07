@@ -1,0 +1,9 @@
+{
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "files.associations": {
+    "*.json": "jsonc"
+  },
+  "prettier.useEditorConfig": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": false,
+}

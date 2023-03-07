@@ -1,36 +1,26 @@
-const webpack = require('webpack');
-const { merge } = require('webpack-merge');
-const { resolve } = require('path');
-const webpackConfig = require('../build/webpack.config').default;
+const utils = require('../config/utils');
+const os = require('os');
+const execa = require('execa');
+const args = process.argv.slice(2);
 
-const cwd = process.cwd();
-const packageRoots = [
-  'packages/core',
-  'packages/utils'
-];
+const build = async target => {
+  const pkgDir = `packages/${target}`;
 
-const build = (dir) => {
-  const complier = webpack(merge(webpackConfig, {
-    entry: resolve(dir, 'index.ts'),
-    output: {
-      path: resolve(dir, 'dist'),
-      filename: 'index.js',
-    }
-  }));
-
-  complier.run((err, stats) => {
-    if (err) {
-      // console.error(err);
-      return;
-    }
-
-    // console.log(stats?.toString({
-    //   chunks: false,
-    //   colors: true
-    // }))
+  console.time(pkgDir);
+  await execa('webpack-cli', [`--config=${pkgDir}/webpack.config.js`], {
+    stdio: 'inherit'
   });
+  console.timeEnd(pkgDir);
 };
 
-packageRoots.forEach(packageRoot => {
-  build(resolve(cwd, packageRoot));
-});
+(async () => {
+  console.time('构建所有模块花费时间为');
+  await utils.runParallel(
+    os.cpus().length,
+    args.length > 0
+      ? args.filter(arg => utils.allTargets.includes(arg))
+      : utils.allTargets,
+    build
+  );
+  console.timeEnd('构建所有模块花费时间为');
+})();

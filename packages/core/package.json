@@ -2,11 +2,19 @@
   "name": "@pnpm-demo/core",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "sideEffects": false,
+  "dependencies": {
+    "@pnpm-demo/utils": "workspace:^1.0.0",
+    "element-plus": "^2.2.32"
+  },
+  "devDependencies": {
+    "unplugin-auto-import": "^0.15.0",
+    "unplugin-vue-components": "^0.24.0"
+  }
 }

@@ -1,14 +1,19 @@
-const ORIGN_ENV = {
-  __DEV__: process.env.NODE_ENV === 'development',
-}
+const { isDev, isProd } = require('./utils');
 
-const ENV = Object.keys(ORIGN_ENV).reduce((env, key) => {
-  // @ts-ignore
-  env[key] = JSON.stringify(ORIGN_ENV[key]);
+/**
+ * 打包后实际要替换的环境变量
+ */
+const definePluginOptions = {
+  __DEV__: isDev,
+  __PROD__: isProd,
+  __VUE_OPTIONS_API__: false,
+  __VUE_PROD_DEVTOOLS__: false
+};
+
+/**
+ * DefinePlugin 插件使用变量需要特殊转换
+ */
+module.exports = Object.keys(definePluginOptions).reduce((env, key) => {
+  env[key] = JSON.stringify(definePluginOptions[key]);
   return env;
 }, {});
-
-module.exports = {
-  ORIGN_ENV,
-  ENV
-}
