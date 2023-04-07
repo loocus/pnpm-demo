@@ -1,7 +1,9 @@
 const { merge } = require('webpack-merge');
 const path = require('path');
+const { DefinePlugin } = require('webpack');
 const baseConfig = require('../../config/webpack.base.config').default;
 const { isDev, isProd, LIB_TYPE } = require('../../config/utils');
+const definePluginOptions = require('../../config/env-config')
 
 exports.default = merge(baseConfig, {
   entry: path.resolve(__dirname, 'src/index.ts'),
@@ -15,5 +17,7 @@ exports.default = merge(baseConfig, {
       type: LIB_TYPE
     }
   },
-  plugins: []
+  plugins: [
+    new DefinePlugin(definePluginOptions),
+  ]
 });

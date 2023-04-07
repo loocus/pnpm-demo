@@ -1,5 +1,11 @@
 <template>
-  <span>123</span>
+  <span>{{ count }}</span>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const count = ref(0)
+
+defineExpose({
+  count
+})
+</script>

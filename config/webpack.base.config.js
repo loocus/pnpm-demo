@@ -5,8 +5,6 @@ const { resolve } = require('path');
 const readLine = require('readline');
 const { isDev, isProd } = require('./utils');
 
-const definePluginOptions = require('./env-config');
-
 exports.default = {
   mode: isProd ? 'production' : 'development',
   cache: isDev
@@ -59,7 +57,6 @@ exports.default = {
     }
   },
   plugins: [
-    new DefinePlugin(definePluginOptions),
     // new ForkTsCheckerWebpackPlugin()
     // new ProgressPlugin({
     //   activeModules: false,
@@ -81,7 +78,7 @@ exports.default = {
     //   percentBy: null
     // }),
     new ESLintPlugin({
-      extensions: ['js', 'ts'],
+      extensions: ['js', 'ts', 'vue'],
       exclude: ['node_modules', '**/node_modules'],
       fix: true
     }),

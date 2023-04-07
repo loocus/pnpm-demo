@@ -2,17 +2,22 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { DefinePlugin } = require('webpack');
 const AutoImport = require('unplugin-auto-import/webpack');
 const Components = require('unplugin-vue-components/webpack');
-const baseConfig = require('../../config/webpack.base.config').default;
 const { ElementPlusResolver } = require('unplugin-vue-components/resolvers');
+const Icons = require('unplugin-icons/webpack');
+const IconsResolver = require('unplugin-icons/resolver');
 const { merge } = require('webpack-merge');
 const path = require('path');
 const { isDev, isProd } = require('../../config/utils');
+const baseConfig = require('../../config/webpack.base.config').default;
+const definePluginOptions = require('./env-config').default;
 const { version: vueVersion } = require('vue');
-const { version: elementPlusversion } = require('element-plus')
+const { version: elementPlusversion } = require('element-plus');
 
 exports.default = merge(baseConfig, {
+  context: __dirname,
   entry: [path.resolve(__dirname, 'src/main.ts')],
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -20,10 +25,11 @@ exports.default = merge(baseConfig, {
   },
   resolve: {
     alias: {
-      '@components': 'src/components',
+      '@': path.resolve(__dirname, 'src'),
     }
   },
   optimization: {
+    providedExports: true,
     splitChunks: {
       chunks: 'async',
       cacheGroups: {
@@ -33,10 +39,10 @@ exports.default = merge(baseConfig, {
           chunks: 'all'
         },
         element: {
-          test: /[\\/]node_modules[\\/]element-(plus|ui)[\\/]/,
-          name: `element_${elementPlusversion}`,
+          test: /[\\/]node_modules[\\/]element-(plus|ui)[\\/]es[\\/]\.mjs$/,
+          name: `element-plus_${elementPlusversion}`,
           chunks: 'all'
-        }
+        },
       }
     }
   },
@@ -53,25 +59,30 @@ exports.default = merge(baseConfig, {
       },
       {
         test: /\.s?css$/i,
+        sideEffects: true,
         use: [
           isProd ? MiniCssExtractPlugin.loader : 'style-loader',
           {
             loader: 'css-loader',
             options: {
-              sourceMap: isDev
+              sourceMap: isDev,
             }
           },
           {
             loader: 'sass-loader',
             options: {
-              sourceMap: isDev
+              sourceMap: isDev,
+              additionalData: `@use '~@/scss/global.scss' as *;`
             }
           }
         ]
       },
       {
         test: /\.(png|jpg|gif)$/i,
-        type: 'asset/resource'
+        type: 'asset/resource',
+        generator: {
+          filename: 'img/[hash][ext]'
+        }
       },
       {
         test: /\.svg/,
@@ -80,6 +91,7 @@ exports.default = merge(baseConfig, {
     ]
   },
   plugins: [
+    new DefinePlugin(definePluginOptions),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'index.html')
     }),
@@ -92,19 +104,39 @@ exports.default = merge(baseConfig, {
       chunkFilename: '[id].css'
     }),
     AutoImport({
-      imports: ['vue'],
-      dts: path.resolve(__dirname, 'auto-imports.d.ts'),
-      resolvers: [ElementPlusResolver()],
+      imports: ['vue', 'vue-router', 'pinia', 'vue-i18n'],
+      dts: path.resolve(__dirname, 'types/auto-imports.d.ts'),
+      resolvers: [
+        ElementPlusResolver(),
+        IconsResolver({
+          prefix: 'Icon',
+        }),
+      ],
       eslintrc: {
-        enabled: false,
+        enabled: isProd,
+        filepath: path.resolve(__dirname, '.eslintrc-auto-import.json'),
+        globalsPropValue: true
       }
     }),
     Components({
-      dts: path.resolve(__dirname, 'components.d.ts'),
-      resolvers: [ElementPlusResolver()],
-      eslintrc: {
-        enabled: false,
-      }
+      dts: path.resolve(__dirname, 'types/components.d.ts'),
+      /**
+       * 相对于 process.cwd() 的组件路径
+       */
+      dirs: [
+        'packages/core/src/components',
+        'packages/core/src/layout',
+        'packages/core/src/pages'
+      ],
+      resolvers: [
+        ElementPlusResolver(),
+        IconsResolver({
+          enabledCollections: ['ep', 'material-symbols', 'mdi'],
+        }),
+      ]
+    }),
+    Icons({
+      autoInstall: false,
     })
   ]
 });

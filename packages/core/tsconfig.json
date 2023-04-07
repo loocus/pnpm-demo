@@ -1,18 +1,17 @@
 {
   "extends": ["../../tsconfig.json"],
   "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["element-plus/global", "@types/mockjs"],
     "paths": {
-      "@": ["./src"]
+      "@/*": ["src/*"]
     }
   },
   "include": [
-    "../core",
+    "../",
     "../global.d.ts",
-    "./auto-imports.d.ts",
-    "./components.d.ts",
-    "./shim.d.ts"
+    "types/*.d.ts"
   ],
   "exclude": [
-    "node_modules"
   ]
 }
